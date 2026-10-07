@@ -1,30 +1,28 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:gaan_shuni/main.dart';
+import 'package:gaan_shuni/core/constants/app_constants.dart';
+import 'package:gaan_shuni/core/utils/duration_formatter.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('DurationFormatter', () {
+    test('formats short duration correctly', () {
+      expect(DurationFormatter.format(0), '00:00');
+      expect(DurationFormatter.format(65000), '01:05');
+      expect(DurationFormatter.format(125000), '02:05');
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('formats long duration with hours', () {
+      expect(DurationFormatter.format(3665000), '1:01:05');
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    test('formats file size correctly', () {
+      expect(DurationFormatter.formatFileSize(1024), '1.0 KB');
+      expect(DurationFormatter.formatFileSize(1048576 * 5), '5.0 MB');
+    });
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  group('AppConstants', () {
+    test('has correct app identity', () {
+      expect(AppConstants.appName, 'Gaan Shuni');
+    });
   });
 }
