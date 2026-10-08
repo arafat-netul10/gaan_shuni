@@ -144,12 +144,21 @@ class LibraryProvider extends ChangeNotifier {
       _status = ScanStatus.indexing;
       notifyListeners();
 
+      // Deduplicate discovered files by filePath
+      final uniqueDiscoveredFiles = <String, DiscoveredAudioFile>{};
+      for (final file in discoveredFiles) {
+        if (file.filePath.trim().isNotEmpty) {
+          uniqueDiscoveredFiles.putIfAbsent(file.filePath, () => file);
+        }
+      }
+      final deduplicatedFiles = uniqueDiscoveredFiles.values.toList();
+
       // 3. Incremental indexing
       final indexedPaths = await songRepository.getAllIndexedPaths();
-      final discoveredPaths = discoveredFiles.map((f) => f.filePath).toSet();
+      final discoveredPaths = deduplicatedFiles.map((f) => f.filePath).toSet();
 
       // Songs to insert
-      final toInsert = discoveredFiles
+      final toInsert = deduplicatedFiles
           .where((f) => forceFullRescan || !indexedPaths.contains(f.filePath))
           .map(
             (f) => Song(
@@ -187,8 +196,8 @@ class LibraryProvider extends ChangeNotifier {
         }
       }
 
-      _status = ScanStatus.completed;
       await _loadSongs();
+      _status = ScanStatus.completed;
     } catch (e, st) {
       debugPrint('Error scanning music: $e\n$st');
       _status = ScanStatus.error;

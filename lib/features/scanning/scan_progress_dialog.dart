@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../providers/library_provider.dart';
 
 /// Modal or inline dialog showing music scanning and indexing progress.
-class ScanProgressDialog extends StatelessWidget {
+class ScanProgressDialog extends StatefulWidget {
   const ScanProgressDialog({super.key});
 
   static Future<void> show(BuildContext context) {
@@ -16,22 +16,35 @@ class ScanProgressDialog extends StatelessWidget {
   }
 
   @override
+  State<ScanProgressDialog> createState() => _ScanProgressDialogState();
+}
+
+class _ScanProgressDialogState extends State<ScanProgressDialog> {
+  bool _dismissed = false;
+
+  void _checkAutoDismiss(ScanStatus status) {
+    if (_dismissed) return;
+
+    if (status == ScanStatus.completed ||
+        status == ScanStatus.error ||
+        status == ScanStatus.permissionDenied ||
+        status == ScanStatus.permissionPermanentlyDenied) {
+      _dismissed = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && Navigator.of(context).canPop()) {
+          Navigator.of(context).pop();
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final libraryProvider = context.watch<LibraryProvider>();
     final status = libraryProvider.status;
 
-    // Auto-dismiss when completed or failed
-    if (status == ScanStatus.completed ||
-        status == ScanStatus.error ||
-        status == ScanStatus.permissionDenied ||
-        status == ScanStatus.permissionPermanentlyDenied) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (Navigator.of(context).canPop()) {
-          Navigator.of(context).pop();
-        }
-      });
-    }
+    _checkAutoDismiss(status);
 
     final isScanning = status == ScanStatus.scanning;
     final isIndexing = status == ScanStatus.indexing;

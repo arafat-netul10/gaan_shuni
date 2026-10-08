@@ -1,3 +1,13 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.1.0")
+    }
+}
+
 allprojects {
     repositories {
         google()
@@ -16,6 +26,7 @@ subprojects {
     project.layout.buildDirectory.value(newSubprojectBuildDir)
 }
 subprojects {
+    pluginManager.apply("org.jetbrains.kotlin.android")
     project.evaluationDependsOn(":app")
 }
 

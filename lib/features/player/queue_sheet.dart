@@ -76,7 +76,7 @@ class QueueSheet extends StatelessWidget {
                   : ReorderableListView.builder(
                       scrollController: scrollController,
                       itemCount: queue.length,
-                      onReorderItem: (oldIndex, newIndex) =>
+                      onReorder: (oldIndex, newIndex) =>
                           player.reorderQueue(oldIndex, newIndex),
                       itemBuilder: (context, index) {
                         final song = queue[index];

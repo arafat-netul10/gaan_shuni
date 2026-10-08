@@ -13,6 +13,9 @@
         android:label="Gaan Shuni"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <meta-data
+            android:name="flutterEmbedding"
+            android:value="2" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

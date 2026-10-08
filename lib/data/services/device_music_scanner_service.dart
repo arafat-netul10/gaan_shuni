@@ -34,6 +34,15 @@ class DeviceMusicScannerService implements MusicScannerService {
     void Function(int current, int total)? onProgress,
   ) async {
     try {
+      final hasPermission = await _audioQuery.permissionsStatus();
+      if (!hasPermission) {
+        final granted = await _audioQuery.permissionsRequest();
+        if (!granted) {
+          debugPrint('OnAudioQuery permission not granted');
+          return [];
+        }
+      }
+
       final songs = await _audioQuery.querySongs(
         sortType: SongSortType.TITLE,
         orderType: OrderType.ASC_OR_SMALLER,
@@ -45,39 +54,54 @@ class DeviceMusicScannerService implements MusicScannerService {
       final total = songs.length;
 
       for (int i = 0; i < songs.length; i++) {
-        final s = songs[i];
-        final ext = p.extension(s.displayName).toLowerCase().replaceAll('.', '');
-        final format = ext.isNotEmpty ? ext : 'mp3';
+        try {
+          final s = songs[i];
+          final filePath = s.data.trim();
+          if (filePath.isEmpty) continue;
 
-        // Check if format is supported
-        if (AppConstants.supportedFormats.contains(format) || format == 'flac') {
-          final title = (s.title.trim().isNotEmpty) ? s.title : s.displayName;
-          final artist = (s.artist != null && s.artist != '<unknown>')
-              ? s.artist!
-              : 'Unknown Artist';
-          final album = (s.album != null && s.album != '<unknown>')
-              ? s.album!
-              : 'Unknown Album';
+          final displayName = s.displayName.trim().isNotEmpty
+              ? s.displayName.trim()
+              : p.basename(filePath);
+          final ext = p.extension(displayName).toLowerCase().replaceAll('.', '');
+          final format = ext.isNotEmpty ? ext : 'mp3';
 
-          result.add(
-            DiscoveredAudioFile(
-              filePath: s.data,
-              fileName: s.displayName,
-              title: title,
-              artist: artist,
-              album: album,
-              genre: s.genre,
-              trackNumber: s.track,
-              durationMs: s.duration ?? 0,
-              fileSize: s.size,
-              format: format,
-              hasArtwork: s.id > 0,
-              dateAdded: s.dateAdded != null
-                  ? s.dateAdded! * 1000
-                  : DateTime.now().millisecondsSinceEpoch,
-              dateModified: DateTime.now().millisecondsSinceEpoch,
-            ),
-          );
+          // Check if format is supported
+          if (AppConstants.supportedFormats.contains(format) || format == 'flac') {
+            final rawTitle = s.title.trim();
+            final title = rawTitle.isNotEmpty ? rawTitle : displayName;
+            final artist = (s.artist != null &&
+                    s.artist != '<unknown>' &&
+                    s.artist!.trim().isNotEmpty)
+                ? s.artist!.trim()
+                : 'Unknown Artist';
+            final album = (s.album != null &&
+                    s.album != '<unknown>' &&
+                    s.album!.trim().isNotEmpty)
+                ? s.album!.trim()
+                : 'Unknown Album';
+
+            result.add(
+              DiscoveredAudioFile(
+                filePath: filePath,
+                fileName: displayName,
+                title: title,
+                artist: artist,
+                album: album,
+                genre: s.genre,
+                trackNumber: s.track,
+                durationMs: s.duration ?? 0,
+                fileSize: s.size,
+                format: format,
+                hasArtwork: s.id > 0,
+                dateAdded: s.dateAdded != null
+                    ? s.dateAdded! * 1000
+                    : DateTime.now().millisecondsSinceEpoch,
+                dateModified: DateTime.now().millisecondsSinceEpoch,
+              ),
+            );
+          }
+        } catch (itemError) {
+          debugPrint('Error parsing audio item $i: $itemError');
         }
 
         if (onProgress != null && (i % 20 == 0 || i == total - 1)) {

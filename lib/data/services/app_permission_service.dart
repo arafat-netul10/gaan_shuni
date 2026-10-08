@@ -28,8 +28,7 @@ class AppPermissionService implements PermissionService {
       final storageStatus = await ph.Permission.storage.status;
       if (storageStatus.isGranted) return AppPermissionStatus.granted;
 
-      // If either is permanently denied, report permanently denied
-      if (audioStatus.isPermanentlyDenied || storageStatus.isPermanentlyDenied) {
+      if (audioStatus.isPermanentlyDenied && storageStatus.isPermanentlyDenied) {
         return AppPermissionStatus.permanentlyDenied;
       }
 
@@ -65,7 +64,7 @@ class AppPermissionService implements PermissionService {
       final storageStatus = await ph.Permission.storage.request();
       if (storageStatus.isGranted) return AppPermissionStatus.granted;
 
-      if (audioStatus.isPermanentlyDenied || storageStatus.isPermanentlyDenied) {
+      if (audioStatus.isPermanentlyDenied && storageStatus.isPermanentlyDenied) {
         return AppPermissionStatus.permanentlyDenied;
       }
 
