@@ -34,13 +34,10 @@ class DeviceMusicScannerService implements MusicScannerService {
     void Function(int current, int total)? onProgress,
   ) async {
     try {
-      final hasPermission = await _audioQuery.permissionsStatus();
+      final hasPermission = await _audioQuery.checkAndRequest();
       if (!hasPermission) {
-        final granted = await _audioQuery.permissionsRequest();
-        if (!granted) {
-          debugPrint('OnAudioQuery permission not granted');
-          return [];
-        }
+        debugPrint('OnAudioQuery permission not granted');
+        return [];
       }
 
       final songs = await _audioQuery.querySongs(

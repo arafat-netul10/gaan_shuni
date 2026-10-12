@@ -76,6 +76,7 @@ class QueueSheet extends StatelessWidget {
                   : ReorderableListView.builder(
                       scrollController: scrollController,
                       itemCount: queue.length,
+                      // ignore: deprecated_member_use
                       onReorder: (oldIndex, newIndex) =>
                           player.reorderQueue(oldIndex, newIndex),
                       itemBuilder: (context, index) {

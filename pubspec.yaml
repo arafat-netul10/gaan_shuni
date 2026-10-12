@@ -41,9 +41,23 @@ dev_dependencies:
   # Drift code generation
   drift_dev: ^2.22.0
   build_runner: ^2.4.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
 
 flutter:
   uses-material-design: true
 
   assets:
     - assets/images/
+
+flutter_launcher_icons:
+  image_path: "assets/images/Gaan Shuni Music Icon.png"
+  android: true
+  ios: true
+
+flutter_native_splash:
+  color: "#0F0F1A"
+  image: "assets/images/Gaan Shuni Music Icon.png"
+  android: true
+  ios: true
+  fullscreen: true

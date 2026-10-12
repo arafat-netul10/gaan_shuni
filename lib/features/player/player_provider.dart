@@ -233,4 +233,19 @@ class PlayerProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<void> toggleCurrentSongFavorite() async {
+    if (_currentSong != null) {
+      await songRepository.toggleFavorite(_currentSong!.id);
+      _currentSong = await songRepository.getSongById(_currentSong!.id);
+      if (_currentSong != null) {
+        _songCache[_currentSong!.id.toString()] = _currentSong!;
+        final qIndex = _queue.indexWhere((s) => s.id == _currentSong!.id);
+        if (qIndex >= 0) {
+          _queue[qIndex] = _currentSong!;
+        }
+      }
+      notifyListeners();
+    }
+  }
 }

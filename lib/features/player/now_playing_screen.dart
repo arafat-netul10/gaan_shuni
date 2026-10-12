@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 
 import '../../core/utils/duration_formatter.dart';
 import '../../domain/models/enums.dart';
-import '../../domain/repositories/song_repository.dart';
 import '../../widgets/artwork_widget.dart';
 import 'player_provider.dart';
 import 'queue_sheet.dart';
@@ -16,7 +15,6 @@ class NowPlayingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final player = context.watch<PlayerProvider>();
-    final songRepo = context.read<SongRepository>();
     final song = player.currentSong;
 
     if (song == null) {
@@ -58,11 +56,10 @@ class NowPlayingScreen extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28.0),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
           child: Column(
             children: [
-              const Spacer(),
               // Large Artwork
               Center(
                 child: Hero(
@@ -80,14 +77,14 @@ class NowPlayingScreen extends StatelessWidget {
                     ),
                     child: ArtworkWidget(
                       songId: song.id,
-                      size: MediaQuery.of(context).size.width * 0.75,
+                      size: MediaQuery.of(context).size.width * 0.7,
                       borderRadius: 24,
                       fallbackIcon: Icons.music_note_rounded,
                     ),
                   ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 36),
 
               // Song Info and Favorite button
               Row(
@@ -126,12 +123,12 @@ class NowPlayingScreen extends StatelessWidget {
                       size: 28,
                     ),
                     onPressed: () async {
-                      await songRepo.toggleFavorite(song.id);
+                      await player.toggleCurrentSongFavorite();
                     },
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
               // Seek Slider
               Column(
@@ -171,7 +168,7 @@ class NowPlayingScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               // Playback Controls Row
               Row(
@@ -234,7 +231,7 @@ class NowPlayingScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const Spacer(),
+              const SizedBox(height: 24),
             ],
           ),
         ),
